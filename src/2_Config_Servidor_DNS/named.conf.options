@@ -6,18 +6,19 @@ acl goodclients {
 
 options {
     directory "/var/cache/bind";
-
     forwarders {
         8.8.8.8;
         8.8.4.4;
     };
-
     allow-query { 
         any; 
     };
     recursion yes;
-
     dnssec-validation auto;
-
     listen-on-v6 { any; };
+
+    allow-update { key dhcp_update; }; // Permite atualizações dinâmicas apenas de clientes confiáveis
+    update-policy {
+        grant goodclients zonesub ANY; // Permite atualizações de subdomínios para clientes confiáveis
+    };
 };
