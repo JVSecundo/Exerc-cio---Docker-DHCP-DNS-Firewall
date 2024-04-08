@@ -1,28 +1,33 @@
+#!/bin/bash
 
-tail -f /dev/null
-#Limpando todas as regras existentes
-
+# Limpando todas as regras existentes
 iptables -F
 iptables -X
 
-#definindo a política padrão como DROP (bloquear tudo)
+# Definindo a política padrão como DROP (bloquear tudo)
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT ACCEPT
 
-#permitindo conexões de loopback
+# Permitindo conexões de loopback
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
-#Permitindo tráfego relacionado e estabelecido
+# Permitindo tráfego relacionado e estabelecido
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-#permitindo tráfego DHCP
+# Permitindo tráfego DHCP
 iptables -A INPUT -p udp --dport 67:68 --sport 67:68 -j ACCEPT
 
-#permitindo tráfego DNS
+# Permitindo tráfego DNS
 iptables -A INPUT -p udp --dport 53 -j ACCEPT
 iptables -A INPUT -p tcp --dport 53 -j ACCEPT
 
-#bloqueado o trem 
-iptables -A INPUT -s 200.18.168.100 -p icmp --icmp-type echo-request -j DROP
+# Salvando as configurações do firewall
+iptables-save > /etc/iptables/rules.v4
+
+# Iniciando o serviço do firewall
+service iptables restart
+
+# Mantendo o container em execução
+tail -f /dev/null
